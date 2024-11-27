@@ -21,6 +21,8 @@ hotels = [
 def get_hotels(
         id: int | None = Query(None, description="ID отеля"),
         title: str | None = Query(None, description="Название отеля"),
+        page: int | None = Query(None, description="Номер страницы"),
+        per_page: int | None = Query(None, description="Количество записей на странице"),
 ):
     global hotels
 
@@ -31,7 +33,27 @@ def get_hotels(
         if title and hotel["title"] != title:
             continue
         hotels_.append(hotel)
-    return hotels_
+
+    length = len(hotels_)  # количество записей
+
+    # значения по умолчанию
+    default_page = 1  # номер страницы
+    default_per_page = 3  # количество записей на странице (минимальное)
+
+    # обработка отрицательных значений и None в page и per_page
+    page = max(page if page else default_page, 1)
+    per_page = max(per_page if per_page else default_per_page, default_per_page)
+
+    # проверка превышения номера страницы максимального значения
+    page = min(page, (length // per_page) + 1)
+
+    # нахождение номера первой и последней записи
+    start = (page - 1) * per_page
+    end = start + per_page
+    if end > length:
+        end = length
+
+    return hotels_[start:end]
 
 
 @hotels_router.post("/hotels")
