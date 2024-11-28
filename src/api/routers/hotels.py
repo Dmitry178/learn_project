@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, Body
 
-from schemas.hotels import Hotel, HotelPatch
+from src.schemas.hotels import Hotel, HotelPatch, PaginationDep
 
 hotels_router = APIRouter(prefix="/hotels", tags=["Отели"])
 
@@ -19,10 +19,9 @@ hotels = [
 
 @hotels_router.get("/hotels")
 def get_hotels(
+        pagination: PaginationDep,
         id: int | None = Query(None, description="ID отеля"),
         title: str | None = Query(None, description="Название отеля"),
-        page: int | None = Query(None, description="Номер страницы"),
-        per_page: int | None = Query(None, description="Количество записей на странице"),
 ):
     global hotels
 
@@ -41,8 +40,8 @@ def get_hotels(
     default_per_page = 3  # количество записей на странице (минимальное)
 
     # обработка отрицательных значений и None в page и per_page
-    page = max(page if page else default_page, 1)
-    per_page = max(per_page if per_page else default_per_page, default_per_page)
+    page = max(pagination.page if pagination.page else default_page, 1)
+    per_page = max(pagination.per_page if pagination.per_page else default_per_page, default_per_page)
 
     # проверка превышения номера страницы максимального значения
     page = min(page, (length // per_page) + 1)
