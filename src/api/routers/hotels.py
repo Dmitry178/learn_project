@@ -1,5 +1,8 @@
 from fastapi import APIRouter, Query, Body
+from sqlalchemy import insert, select
 
+from src.database import async_session_maker, engine
+from src.models import HotelsOrm
 from src.schemas.hotels import Hotel, HotelPatch, PaginationDep
 
 hotels_router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -18,75 +21,62 @@ hotels = [
 
 
 @hotels_router.get("/hotels")
-def get_hotels(
+async def get_hotels(
         pagination: PaginationDep,
-        id: int | None = Query(None, description="ID отеля"),
         title: str | None = Query(None, description="Название отеля"),
+        location: str | None = Query(None, description="Расположение отеля"),
 ):
-    global hotels
+    per_page = pagination.per_page or 5
 
-    hotels_ = []
-    for hotel in hotels:
-        if id and hotel["id"] != id:
-            continue
-        if title and hotel["title"] != title:
-            continue
-        hotels_.append(hotel)
+    async with async_session_maker() as session:
+        query = select(HotelsOrm)
 
-    length = len(hotels_)  # количество записей
+        if title:
+            query = query.filter_by(title=title)
 
-    # значения по умолчанию
-    default_page = 1  # номер страницы
-    default_per_page = 3  # количество записей на странице (минимальное)
+        if location:
+            query = query.filter_by(location=location)
 
-    # обработка отрицательных значений и None в page и per_page
-    page = max(pagination.page if pagination.page else default_page, 1)
-    per_page = max(pagination.per_page if pagination.per_page else default_per_page, default_per_page)
+        query = (
+            query
+            .limit(per_page)
+            .offset(per_page * (pagination.page - 1))
+        )
 
-    # проверка превышения номера страницы максимального значения
-    page = min(page, (length // per_page) + 1)
-
-    # нахождение номера первой и последней записи
-    start = (page - 1) * per_page
-    end = start + per_page
-    if end > length:
-        end = length
-
-    return hotels_[start:end]
+        result = await session.execute(query)
+        return result.scalars().all()
 
 
 @hotels_router.post("/hotels")
-def create_hotel(
+async def create_hotel(
         hotel_data: Hotel = Body(openapi_examples={
             "1": {
                 "summary": "Madrid",
                 "value": {
                     "title": "Мадрид",
-                    "name": "madrid",
+                    "location": "madrid",
                 }
             },
             "2": {
                 "summary": "Barcelona",
                 "value": {
                     "title": "Барселона",
-                    "name": "barcelona",
+                    "location": "barcelona",
                 }
             }
         })
 ):
-    global hotels
-
-    hotels.append({
-        "id": hotels[-1]["id"] + 1,
-        "title": hotel_data.title,
-        "name": hotel_data.name
-    })
+    async with async_session_maker() as session:
+        stmt = insert(HotelsOrm).values(**hotel_data.model_dump())
+        print(stmt.compile(engine, compile_kwargs={"literal_binds": True}))
+        await session.execute(stmt)
+        await session.commit()
 
     return {"status": "OK"}
 
 
 @hotels_router.delete("/hotels/{hotel_id}")
-def delete_hotel(hotel_id: int):
+async def delete_hotel(hotel_id: int):
     global hotels
 
     hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
@@ -94,7 +84,7 @@ def delete_hotel(hotel_id: int):
     return {"status": "OK"}
 
 
-def update_name_and_or_title(hotel_id: int, new_name: str | None, new_title: str | None) -> bool:
+async def update_name_and_or_title(hotel_id: int, new_name: str | None, new_title: str | None) -> bool:
 
     global hotels
 
@@ -113,7 +103,7 @@ def update_name_and_or_title(hotel_id: int, new_name: str | None, new_title: str
 
 
 @hotels_router.put("/hotels/{hotel_id}")
-def put_hotel(hotel_id: int, data: Hotel):
+async def put_hotel(hotel_id: int, data: Hotel):
     # Вызывается та же функция, что и для метода patch, т.к. внутри update_name_and_or_title
     # отрабатывается вариант отсутствия name или title, а т.к. в put в аргументах эти значения обязательны,
     # будут отработаны оба аргумента
@@ -123,7 +113,7 @@ def put_hotel(hotel_id: int, data: Hotel):
 
 
 @hotels_router.patch("/hotels/{hotel_id}")
-def patch_hotel(hotel_id: int, data: HotelPatch):
+async def patch_hotel(hotel_id: int, data: HotelPatch):
 
     result = update_name_and_or_title(hotel_id, data.name, data.title)
     return {"status": "OK" if result else "Hotel not found"}
