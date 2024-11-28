@@ -29,13 +29,13 @@ async def get_hotels(
     per_page = pagination.per_page or 5
 
     async with async_session_maker() as session:
-        query = select(HotelsOrm)
+        query = select(HotelsOrm.id, HotelsOrm.title, HotelsOrm.location)
 
         if title:
-            query = query.filter_by(title=title)
+            query = query.where(HotelsOrm.title.ilike(f'%{title}%'))
 
         if location:
-            query = query.filter_by(location=location)
+            query = query.where(HotelsOrm.location.ilike(f'%{location}%'))
 
         query = (
             query
@@ -44,7 +44,7 @@ async def get_hotels(
         )
 
         result = await session.execute(query)
-        return result.scalars().all()
+        return result.mappings().all()
 
 
 @hotels_router.post("/hotels")
