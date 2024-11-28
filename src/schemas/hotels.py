@@ -6,16 +6,16 @@ from pydantic import BaseModel, Field
 
 class Hotel(BaseModel):
     title: str
-    name: str
+    location: str
 
 
 class HotelPatch(BaseModel):
     title: str | None = Field(None)
-    name: str | None = Field(None)
+    location: str | None = Field(None)
 
 
 class PaginationParams(BaseModel):
-    page: Annotated[int | None, Query(None, ge=1)]
+    page: Annotated[int | None, Query(1, ge=1)]
     per_page: Annotated[int | None, Query(None, ge=1, le=30)]
 
 
