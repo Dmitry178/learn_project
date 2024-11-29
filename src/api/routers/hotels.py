@@ -8,6 +8,13 @@ from src.schemas.hotels import Hotel, HotelPatch, PaginationDep
 hotels_router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
+@hotels_router.get("/hotel")
+async def get_hotel(hotel_id: int):
+
+    async with async_session_maker() as session:
+        return await HotelsRepository(session).get_one_or_none(id=hotel_id)
+
+
 @hotels_router.get("/hotels")
 async def get_hotels(
         pagination: PaginationDep,

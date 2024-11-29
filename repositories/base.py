@@ -16,7 +16,7 @@ class BaseRepository:
     async def get_one_or_none(self, **filter_by) -> RowMapping:
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
-        return result.mappings().one_or_none()
+        return result.scalars().one_or_none()
 
     async def add(self, data: BaseModel) -> RowMapping:
 
