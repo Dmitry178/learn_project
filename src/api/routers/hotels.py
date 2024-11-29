@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Query, Body
+from pydantic import BaseModel
 
 from repositories.hotels import HotelsRepository
 from src.database import async_session_maker
@@ -62,9 +63,10 @@ async def create_hotel(
 
 @hotels_router.delete("/hotels/{hotel_id}")
 async def delete_hotel(hotel_id: int):
-    global hotels
 
-    hotels = [hotel for hotel in hotels if hotel["id"] != hotel_id]
+    async with async_session_maker() as session:
+        await HotelsRepository(session).delete_by_id(hotel_id)
+        await session.commit()
 
     return {"status": "OK"}
 
@@ -88,13 +90,13 @@ async def update_name_and_or_title(hotel_id: int, new_name: str | None, new_titl
 
 
 @hotels_router.put("/hotels/{hotel_id}")
-async def put_hotel(hotel_id: int, data: Hotel):
-    # Вызывается та же функция, что и для метода patch, т.к. внутри update_name_and_or_title
-    # отрабатывается вариант отсутствия name или title, а т.к. в put в аргументах эти значения обязательны,
-    # будут отработаны оба аргумента
+async def put_hotel(hotel_id: int, hotel_data: HotelPatch):
 
-    result = update_name_and_or_title(hotel_id, data.name, data.title)
-    return {"status": "OK" if result else "Hotel not found"}
+    async with async_session_maker() as session:
+        await HotelsRepository(session).edit_by_id(hotel_id, hotel_data)
+        await session.commit()
+
+        return {"status": "OK"}
 
 
 @hotels_router.patch("/hotels/{hotel_id}")
