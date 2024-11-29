@@ -1,5 +1,5 @@
 from repositories.base import BaseRepository
-from sqlalchemy import select, func, RowMapping
+from sqlalchemy import select, func, RowMapping, insert
 
 from src.database import engine
 from src.models.hotels import HotelsOrm
@@ -9,7 +9,7 @@ class HotelsRepository(BaseRepository):
     model = HotelsOrm
 
     async def get_all(
-            self, location: str, title: str, limit: int | None = None, offset: int | None = None
+            self, title: str, location: str, limit: int | None = None, offset: int | None = None
     ) -> RowMapping:
 
         query = select(HotelsOrm.id, HotelsOrm.title, HotelsOrm.location)
@@ -30,3 +30,14 @@ class HotelsRepository(BaseRepository):
         result = await self.session.execute(query)
 
         return result.mappings().all()
+
+    async def insert_data(self, **data) -> RowMapping:
+
+        stmt = (
+            insert(HotelsOrm)
+            .values(**data)
+            .returning(HotelsOrm)
+        )
+        result = await self.session.execute(stmt)
+
+        return result.fetchone()[0]
