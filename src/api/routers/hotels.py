@@ -7,18 +7,6 @@ from src.schemas.hotels import Hotel, HotelPatch, PaginationDep
 
 hotels_router = APIRouter(prefix="/hotels", tags=["Отели"])
 
-hotels = [
-    {"id": 1, "title": "Лондон", "name": "london"},
-    {"id": 2, "title": "Париж", "name": "paris"},
-    {"id": 3, "title": "Сочи", "name": "sochi"},
-    {"id": 4, "title": "Дубай", "name": "dubai"},
-    {"id": 5, "title": "Мальдивы", "name": "maldivi"},
-    {"id": 6, "title": "Геленджик", "name": "gelendzhik"},
-    {"id": 7, "title": "Москва", "name": "moscow"},
-    {"id": 8, "title": "Казань", "name": "kazan"},
-    {"id": 9, "title": "Санкт-Петербург", "name": "spb"},
-]
-
 
 @hotels_router.get("/hotels")
 async def get_hotels(
@@ -61,46 +49,30 @@ async def create_hotel(
         return {"status": "OK", "data": hotel}
 
 
-@hotels_router.delete("/hotels/{hotel_id}")
+@hotels_router.delete("/{hotel_id}")
 async def delete_hotel(hotel_id: int):
 
     async with async_session_maker() as session:
-        await HotelsRepository(session).delete_by_id(hotel_id)
+        await HotelsRepository(session).delete(id=hotel_id)
         await session.commit()
 
     return {"status": "OK"}
 
 
-async def update_name_and_or_title(hotel_id: int, new_name: str | None, new_title: str | None) -> bool:
-
-    global hotels
-
-    idx, hotel = next(((index, hotel) for index, hotel in enumerate(hotels) if hotel['id'] == hotel_id), (None, None))
-
-    if idx is not None:
-        if new_name:
-            hotel['name'] = new_name
-        if new_title:
-            hotel['title'] = new_title
-        hotels[idx] = hotel
-
-        return True
-    else:
-        return False
-
-
-@hotels_router.put("/hotels/{hotel_id}")
-async def put_hotel(hotel_id: int, hotel_data: HotelPatch):
+@hotels_router.put("/{hotel_id}")
+async def put_hotel(hotel_id: int, hotel_data: Hotel):
 
     async with async_session_maker() as session:
-        await HotelsRepository(session).edit_by_id(hotel_id, hotel_data)
+        await HotelsRepository(session).edit(hotel_data, id=hotel_id)
         await session.commit()
-
         return {"status": "OK"}
 
 
-@hotels_router.patch("/hotels/{hotel_id}")
-async def patch_hotel(hotel_id: int, data: HotelPatch):
+@hotels_router.patch("/{hotel_id}")
+async def patch_hotel(hotel_id: int, hotel_data: HotelPatch):
 
-    result = update_name_and_or_title(hotel_id, data.name, data.title)
-    return {"status": "OK" if result else "Hotel not found"}
+    async with async_session_maker() as session:
+        await HotelsRepository(session).edit(hotel_data, exclude_unset=True, id=hotel_id)
+        await session.commit()
+
+        return {"status": "OK"}
