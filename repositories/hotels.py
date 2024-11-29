@@ -30,14 +30,3 @@ class HotelsRepository(BaseRepository):
         result = await self.session.execute(query)
 
         return result.mappings().all()
-
-    async def insert_data(self, **data) -> RowMapping:
-
-        stmt = (
-            insert(HotelsOrm)
-            .values(**data)
-            .returning(HotelsOrm)
-        )
-        result = await self.session.execute(stmt)
-
-        return result.fetchone()[0]
