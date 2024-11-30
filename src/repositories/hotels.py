@@ -1,16 +1,17 @@
-from repositories.base import BaseRepository
-from sqlalchemy import select, func, RowMapping, insert
+from src.repositories.base import BaseRepository
+from sqlalchemy import select, func
 
 from src.database import engine
 from src.models.hotels import HotelsOrm
+from src.schemas.hotels import Hotel
 
 
 class HotelsRepository(BaseRepository):
     model = HotelsOrm
 
-    async def get_all(
+    async def get_all_hotels(
             self, title: str, location: str, limit: int | None = None, offset: int | None = None
-    ) -> RowMapping:
+    ) -> list[Hotel]:
 
         query = select(HotelsOrm.id, HotelsOrm.title, HotelsOrm.location)
 
@@ -29,4 +30,5 @@ class HotelsRepository(BaseRepository):
         print(query.compile(engine, compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(query)
 
-        return result.mappings().all()
+        # return result.mappings().all()
+        return [Hotel.model_validate(hotel, from_attributes=True) for hotel in result.scalars().all()]
