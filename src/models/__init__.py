@@ -4,3 +4,6 @@ from src.models.hotels import (
 from src.models.rooms import (
     RoomsOrm
 )
+from src.models.users import (
+    UsersOrm
+)
