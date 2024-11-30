@@ -1,12 +1,20 @@
 from typing import Annotated
 
 from fastapi import Query, Depends
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
+
+
+class HotelAdd(BaseModel):
+    title: str
+    location: str
 
 
 class Hotel(BaseModel):
+    id: int
     title: str
     location: str
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class HotelPatch(BaseModel):

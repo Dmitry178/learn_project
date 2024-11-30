@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Query, Body
-from pydantic import BaseModel
 
-from repositories.hotels import HotelsRepository
+from src.repositories.hotels import HotelsRepository
 from src.database import async_session_maker
-from src.schemas.hotels import Hotel, HotelPatch, PaginationDep
+from src.schemas.hotels import HotelPatch, PaginationDep, HotelAdd
 
 hotels_router = APIRouter(prefix="/hotels", tags=["Отели"])
 
@@ -25,14 +24,14 @@ async def get_hotels(
     offset = limit * (pagination.page - 1)
 
     async with async_session_maker() as session:
-        return await HotelsRepository(session).get_all(
+        return await HotelsRepository(session).get_all_hotels(
             title=title, location=location, limit=limit, offset=offset
         )
 
 
 @hotels_router.post("/hotels")
 async def create_hotel(
-        hotel_data: Hotel = Body(openapi_examples={
+        hotel_data: HotelAdd = Body(openapi_examples={
             "1": {
                 "summary": "Madrid",
                 "value": {
@@ -67,7 +66,7 @@ async def delete_hotel(hotel_id: int):
 
 
 @hotels_router.put("/{hotel_id}")
-async def put_hotel(hotel_id: int, hotel_data: Hotel):
+async def put_hotel(hotel_id: int, hotel_data: HotelAdd):
 
     async with async_session_maker() as session:
         await HotelsRepository(session).edit(hotel_data, id=hotel_id)
