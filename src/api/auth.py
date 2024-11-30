@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Response, Request
 from sqlalchemy.exc import IntegrityError
 
+from src.api.dependencies import UserIdDep
 from src.database import async_session_maker
 from src.repositories.users import UsersRepository
 from src.schemas.users import UserRequestAdd, UserAdd
@@ -11,6 +12,7 @@ auth_router = APIRouter(prefix="/auth", tags=["Авторизация и аут�
 
 @auth_router.post("/login")
 async def login_user(response: Response, data: UserRequestAdd):
+    # bcrypt 3.2.0
     async with async_session_maker() as session:
         user = await UsersRepository(session).get_user_with_hashed_password(email=data.email)
 
@@ -47,10 +49,10 @@ async def register_user(data: UserRequestAdd):
     return {"status": "OK"}
 
 
-@auth_router.get("/only_auth")
+@auth_router.get("/user_info")
 async def only_auth(
-        request: Request,
+        user_id: UserIdDep,
 ):
-    access_token = request.cookies.get("access_token")
-    decoded_token = AuthService().decode_token(access_token)
-    return {"result": access_token, "decoded_token": decoded_token}
+    async with async_session_maker() as session:
+        user = await UsersRepository(session).get_one_or_none(id=user_id)
+        return {"user": user}
