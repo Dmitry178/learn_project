@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Request
 from sqlalchemy.exc import IntegrityError
 
 from src.database import async_session_maker
@@ -45,3 +45,12 @@ async def register_user(data: UserRequestAdd):
             return {"status": "Error creating user"}
 
     return {"status": "OK"}
+
+
+@auth_router.get("/only_auth")
+async def only_auth(
+        request: Request,
+):
+    access_token = request.cookies.get("access_token")
+    decoded_token = AuthService().decode_token(access_token)
+    return {"result": access_token, "decoded_token": decoded_token}

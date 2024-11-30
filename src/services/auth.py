@@ -23,3 +23,11 @@ class AuthService:
         encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
         return encoded_jwt
+
+    @staticmethod
+    def decode_token(token: str) -> dict | None:
+        try:
+            payload = jwt.decode(token, algorithms=settings.JWT_ALGORITHM, key=settings.JWT_SECRET_KEY)
+            return payload
+        except:
+            return None
