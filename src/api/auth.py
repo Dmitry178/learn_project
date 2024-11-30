@@ -28,6 +28,12 @@ async def login_user(response: Response, data: UserRequestAdd):
         return {"access_token": access_token}
 
 
+@auth_router.post("/logout")
+async def logout_user(response: Response):
+    response.delete_cookie("access_token")
+    return {"status": "OK"}
+
+
 @auth_router.post("/register")
 async def register_user(data: UserRequestAdd):
     hashed_password = AuthService().hash_password(data.password)
@@ -50,7 +56,7 @@ async def register_user(data: UserRequestAdd):
 
 
 @auth_router.get("/user_info")
-async def only_auth(
+async def user_info(
         user_id: UserIdDep,
 ):
     async with async_session_maker() as session:
