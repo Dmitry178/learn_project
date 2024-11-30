@@ -2,14 +2,8 @@ import asyncio
 import time
 
 from fastapi import APIRouter
-from starlette.responses import RedirectResponse
 
 load_router = APIRouter(tags=["Нагрузочное тестирование"])
-
-
-@load_router.get("/", summary="Редирект на Swagger UI")
-def redirect():
-    return RedirectResponse("/docs")
 
 
 @load_router.get("/sync/{id}")
