@@ -1,22 +1,26 @@
 from fastapi import APIRouter, Body
 
 from src.api.dependencies import DBDep, UserIdDep
+from src.models import RoomsOrm
 from src.schemas.booking import BookingAdd, BookingPost
 
 bookings_router = APIRouter(prefix="/bookings", tags=["Бронирование"])
 
 
-@bookings_router.post("/booking")
+@bookings_router.post("")
 async def create_booking(
         hotel_id: int,
         user_id: UserIdDep,
         db: DBDep,
         booking_data: BookingAdd = Body()
 ):
+    room: RoomsOrm = await db.rooms.get_one_or_none(id=booking_data.room_id)
+    price: int = room.price
+
     booking_post = BookingPost(
         hotel_id=hotel_id,
         user_id=user_id,
-        price=100,
+        price=price,
         **booking_data.model_dump()
     )
 
