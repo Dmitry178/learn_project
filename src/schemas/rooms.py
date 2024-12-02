@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict
 
 class RoomAdd(BaseModel):
     title: str
-    description: str
+    description: str | None = None
     price: int
     quantity: int
 
