@@ -1,3 +1,6 @@
+from src.models.bookings import (
+    BookingsOrm
+)
 from src.models.hotels import (
     HotelsOrm
 )
