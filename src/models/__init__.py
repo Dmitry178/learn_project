@@ -1,6 +1,10 @@
 from src.models.bookings import (
     BookingsOrm
 )
+from src.models.facilities import (
+    FacilitiesOrm,
+    RoomsFacilitiesOrm
+)
 from src.models.hotels import (
     HotelsOrm
 )
