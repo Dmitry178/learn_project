@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Query, Body
 
 from src.api.dependencies import DBDep
@@ -6,25 +8,28 @@ from src.schemas.hotels import HotelPatch, PaginationDep, HotelAdd
 hotels_router = APIRouter(prefix="/hotels", tags=["Отели"])
 
 
-@hotels_router.get("/hotel")
+@hotels_router.get("")
+async def get_hotels(
+        # pagination: PaginationDep,
+        db: DBDep,
+        # title: str | None = Query(None, description="Название отеля"),
+        # location: str | None = Query(None, description="Расположение отеля"),
+        date_from: date = Query(example="2024-12-01"),
+        date_to: date = Query(example="2024-12-10"),
+):
+    # limit = pagination.per_page or 5
+    # offset = limit * (pagination.page - 1)
+
+    # return await db.hotels.get_all_hotels(title=title, location=location, limit=limit, offset=offset)
+    return await db.hotels.get_hotels_by_date(date_from=date_from, date_to=date_to)
+
+
+@hotels_router.get("/{hotel_id}")
 async def get_hotel(hotel_id: int, db: DBDep):
     return await db.hotels.get_one_or_none(id=hotel_id)
 
 
-@hotels_router.get("/hotels")
-async def get_hotels(
-        pagination: PaginationDep,
-        db: DBDep,
-        title: str | None = Query(None, description="Название отеля"),
-        location: str | None = Query(None, description="Расположение отеля"),
-):
-    limit = pagination.per_page or 5
-    offset = limit * (pagination.page - 1)
-
-    return await db.hotels.get_all_hotels(title=title, location=location, limit=limit, offset=offset)
-
-
-@hotels_router.post("/hotels")
+@hotels_router.post("")
 async def create_hotel(
         db: DBDep,
         hotel_data: HotelAdd = Body(openapi_examples={
