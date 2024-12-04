@@ -10,7 +10,11 @@ class BaseRepository:
         self.session = session
 
     async def get_all(self, *args, **kwargs):
-        query = select(self.model).filter_by(**kwargs)
+        query = (
+            select(self.model)
+            .filter(*args)
+            .filter_by(**kwargs)
+        )
         result = await self.session.execute(query)
 
         # return result.mappings().all()
