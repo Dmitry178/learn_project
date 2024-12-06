@@ -24,13 +24,14 @@ async def get_room(
     return await db.rooms.get_filtered_by_time(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
 
 
-@rooms_router.get("/{hotel_id}/rooms")
-async def get_rooms(hotel_id: int, db: DBDep):
+@rooms_router.get("/{hotel_id}/rooms/{room_id}")
+async def get_rooms(hotel_id: int, room_id: int, db: DBDep):
     """
     Получение списка номеров отеля с hotel_id
     """
 
-    return await db.rooms.get_all(hotel_id=hotel_id)
+    # return await db.rooms.get_one_or_none(id=room_id, hotel_id=hotel_id)
+    return await db.rooms.get_room_info(room_id=room_id, hotel_id=hotel_id)
 
 
 @rooms_router.post("/{hotel_id}/room")

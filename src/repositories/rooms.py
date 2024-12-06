@@ -31,6 +31,20 @@ class RoomsRepository(BaseRepository):
         result = await self.session.execute(query)
         return [RoomWithRels.model_validate(model) for model in result.unique().scalars().all()]
 
+    async def get_room_info(
+            self,
+            room_id: int,
+            hotel_id: int,
+    ):
+        query = (
+            select(self.model)
+            .options(selectinload(RoomsOrm.facilities))
+            .filter(RoomsOrm.id == room_id, RoomsOrm.hotel_id == hotel_id)
+        )
+        result = await self.session.execute(query)
+        result = result.unique().scalars().one_or_none()
+        return RoomWithRels.model_validate(result)
+
     async def get_filtered_by_date(
             self,
             hotel_id: int,
