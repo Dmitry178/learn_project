@@ -20,7 +20,8 @@ async def get_room(
     Получение данных номера с room_id отеля с hotel_id
     """
 
-    return await db.rooms.get_rooms_by_date(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
+    # return await db.rooms.get_rooms_by_date(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
+    return await db.rooms.get_filtered_by_time(hotel_id=hotel_id, date_from=date_from, date_to=date_to)
 
 
 @rooms_router.get("/{hotel_id}/rooms")
