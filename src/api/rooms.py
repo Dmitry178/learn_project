@@ -107,7 +107,8 @@ async def patch_hotel(hotel_id: int, room_id: int, room_data: RoomPatchRequest, 
     room_data_patch = RoomPatch(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
 
     await db.rooms.edit(room_data_patch, id=room_id, exclude_unset=True)
-    await db.rooms_facilities.update_facilities(room_id=room_id, facilities_ids=room_data.facilities_ids)
+    if room_data.facilities_ids:
+        await db.rooms_facilities.update_facilities(room_id=room_id, facilities_ids=room_data.facilities_ids)
     await db.commit()
 
     return {"status": "OK"}
