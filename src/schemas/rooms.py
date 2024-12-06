@@ -34,3 +34,7 @@ class RoomGet(BaseModel):
 
 class RoomPatch(RoomGet):
     hotel_id: int
+
+
+class RoomPatchRequest(RoomGet):
+    facilities_ids: list[int] | None = None

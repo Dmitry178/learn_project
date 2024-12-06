@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Query
 
 from src.api.dependencies import DBDep
 from src.schemas.facilities import RoomFacilityAdd
-from src.schemas.rooms import RoomGet, RoomAdd, RoomPatch, RoomAddId
+from src.schemas.rooms import RoomGet, RoomAdd, RoomPatch, RoomAddId, RoomAddRequest, RoomPatchRequest
 
 rooms_router = APIRouter(prefix="/hotels", tags=["Номера"])
 
@@ -84,23 +84,30 @@ async def delete_hotel(hotel_id: int, room_id: int, db: DBDep):
 
 
 @rooms_router.put("/{hotel_id}/room/{room_id}")
-async def put_hotel(hotel_id: int, room_id: int, room_data: RoomAdd, db: DBDep):
+async def put_hotel(hotel_id: int, room_id: int, room_data: RoomAddRequest, db: DBDep):
     """
     Изменение параметров номера в отеле
     """
 
-    await db.rooms.edit(room_data, id=room_id, hotel_id=hotel_id)
+    room_data_put = RoomAddId(hotel_id=hotel_id, **room_data.model_dump())
+
+    await db.rooms.edit(room_data_put, id=room_id, hotel_id=hotel_id)
+    await db.rooms_facilities.update_facilities(room_id=room_id, facilities_ids=room_data.facilities_ids)
     await db.commit()
+
     return {"status": "OK"}
 
 
 @rooms_router.patch("/{hotel_id}/room/{room_id}")
-async def patch_hotel(hotel_id: int, room_id: int, room_data: RoomGet, db: DBDep):
+async def patch_hotel(hotel_id: int, room_id: int, room_data: RoomPatchRequest, db: DBDep):
     """
     Изменение параметров номера в отеле
     """
 
-    room_data = RoomPatch(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
-    await db.rooms.edit(room_data, id=room_id, exclude_unset=True)
+    room_data_patch = RoomPatch(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
+
+    await db.rooms.edit(room_data_patch, id=room_id, exclude_unset=True)
+    await db.rooms_facilities.update_facilities(room_id=room_id, facilities_ids=room_data.facilities_ids)
     await db.commit()
+
     return {"status": "OK"}
