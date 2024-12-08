@@ -1,3 +1,4 @@
+import asyncio
 import multiprocessing
 import subprocess
 
@@ -9,6 +10,8 @@ from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from pathlib import Path
+
+from src.tasks.asyncio_tasks import run_send_email_regularly
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -27,6 +30,7 @@ from src.init import redis_manager
 async def lifespan(app: FastAPI):  # noqa
 
     # старт приложения
+    # asyncio.create_task(run_send_email_regularly())  # noqa
     await redis_manager.connect()
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
 
@@ -53,16 +57,16 @@ def run_uvicorn():
 
 
 def run_celery():
-    command = ['celery', '--app=src.tasks.celery_app:celery_instance', 'worker', '-l', 'INFO']
+    command = ["celery", "--app=src.tasks.celery_app:celery_instance", "worker", "-l", "INFO", "-B"]
     subprocess.run(command)
 
 
 if __name__ == "__main__":
     uvicorn_process = multiprocessing.Process(target=run_uvicorn)
-    celery_process = multiprocessing.Process(target=run_celery)
+    # celery_process = multiprocessing.Process(target=run_celery)
 
     uvicorn_process.start()
-    celery_process.start()
+    # celery_process.start()
 
     uvicorn_process.join()
-    celery_process.join()
+    # celery_process.join()

@@ -4,3 +4,4 @@
 _*
 !__init__.py
 .env
+celerybeat-schedule
