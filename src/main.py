@@ -1,26 +1,26 @@
-from contextlib import asynccontextmanager
+import multiprocessing
+import subprocess
 
 import uvicorn
-
-from fastapi import FastAPI
-
 import sys
-from pathlib import Path
 
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-
-from src.init import redis_manager
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.api.auth import auth_router
-from src.api.default import default_router
-from src.api.hotels import hotels_router
-from src.api.rooms import rooms_router
 from src.api.booking import bookings_router
+from src.api.default import default_router
 from src.api.facilities import facilities_router
+from src.api.hotels import hotels_router
+from src.api.images import images_router
 from src.api.load import load_router
+from src.api.rooms import rooms_router
+from src.init import redis_manager
 
 
 @asynccontextmanager
@@ -44,7 +44,25 @@ app.include_router(hotels_router)
 app.include_router(rooms_router)
 app.include_router(bookings_router)
 app.include_router(facilities_router)
+app.include_router(images_router)
 app.include_router(load_router)
 
+
+def run_uvicorn():
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+
+
+def run_celery():
+    command = ['celery', '--app=src.tasks.celery_app:celery_instance', 'worker', '-l', 'INFO']
+    subprocess.run(command)
+
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True, port=8001)
+    uvicorn_process = multiprocessing.Process(target=run_uvicorn)
+    celery_process = multiprocessing.Process(target=run_celery)
+
+    uvicorn_process.start()
+    celery_process.start()
+
+    uvicorn_process.join()
+    celery_process.join()

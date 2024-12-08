@@ -14,7 +14,7 @@ def hash_params(params: dict):
     """
 
     # переводим параметры в строку
-    json_str = json.dumps(params, default=str)
+    json_str = json.dumps(sorted(params), default=str)
 
     # убираем данные, заключенные в угловые скобки,
     # таким образом убираются различные зависимости, остаётся всё остальное
