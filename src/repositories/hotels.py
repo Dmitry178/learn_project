@@ -6,13 +6,14 @@ from sqlalchemy import select, func
 
 from src.database import engine
 from src.models.hotels import HotelsOrm
+from src.repositories.mappers.mappers import HotelDataMapper
 from src.repositories.utils import rooms_ids_for_booking
 from src.schemas.hotels import Hotel
 
 
 class HotelsRepository(BaseRepository):
     model = HotelsOrm
-    schema = Hotel
+    mapper = HotelDataMapper
 
     async def get_all_hotels(
             self, title: str, location: str, limit: int | None = None, offset: int | None = None
@@ -36,7 +37,8 @@ class HotelsRepository(BaseRepository):
         result = await self.session.execute(query)
 
         # return result.mappings().all()
-        return [self.schema.model_validate(hotel, from_attributes=True) for hotel in result.mappings().all()]
+        # return [self.schema.model_validate(hotel, from_attributes=True) for hotel in result.mappings().all()]
+        return [self.mapper.map_to_domain_entity(hotel) for hotel in result.scalars().all()]
 
     async def get_hotels_by_date(
             self,
@@ -74,7 +76,8 @@ class HotelsRepository(BaseRepository):
             )
 
         result = await self.session.execute(query)
-        return [self.schema.model_validate(model) for model in result.scalars().all()]
+        # return [self.schema.model_validate(model) for model in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(hotel) for hotel in result.scalars().all()]
 
     async def get_filtered_by_time(
             self,
@@ -112,4 +115,5 @@ class HotelsRepository(BaseRepository):
 
         result = await self.session.execute(query)
 
-        return [Hotel.model_validate(hotel, from_attributes=True) for hotel in result.scalars().all()]
+        # return [Hotel.model_validate(hotel, from_attributes=True) for hotel in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(hotel) for hotel in result.scalars().all()]

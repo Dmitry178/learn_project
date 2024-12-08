@@ -3,17 +3,17 @@ from sqlalchemy.dialects.postgresql import insert
 
 from src.models import FacilitiesOrm, RoomsFacilitiesOrm
 from src.repositories.base import BaseRepository
-from src.schemas.facilities import Facility, RoomsFacility
+from src.repositories.mappers.mappers import FacilityDataMapper, RoomFacilityDataMapper
 
 
 class FacilitiesRepository(BaseRepository):
     model = FacilitiesOrm
-    schema = Facility
+    mapper = FacilityDataMapper
 
 
 class RoomsFacilitiesRepository(BaseRepository):
     model = RoomsFacilitiesOrm
-    schema = RoomsFacility
+    mapper = RoomFacilityDataMapper
 
     async def update_facilities(self, room_id: int, facilities_ids: list):
         """
