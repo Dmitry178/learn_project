@@ -17,6 +17,7 @@ asyncpg = "^0.30.0"
 black = "^24.10.0"
 pyjwt = "^2.10.1"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+redis = "^5.2.1"
 
 
 [build-system]
