@@ -3,5 +3,5 @@
 .venv
 _*
 !__init__.py
-.env
+*.env
 celerybeat-schedule
