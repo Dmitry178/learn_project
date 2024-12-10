@@ -16,6 +16,18 @@ def check_test_mode():
     assert settings.MODE == "TEST"
 
 
+@pytest.fixture(scope="function")
+async def db() -> DBManager:
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        yield db
+
+
+@pytest.fixture(scope="session")
+async def ac() -> AsyncClient:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        yield ac
+
+
 @pytest.fixture(scope="session", autouse=True)
 async def setup_database(check_test_mode):
     print("Очистка базы данных")
@@ -30,19 +42,18 @@ async def setup_database(check_test_mode):
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
-    async with DBManager(session_factory=async_session_maker_null_pool) as db:
-        await db.hotels.add_raw(mock_hotels)
-        await db.rooms.add_raw(mock_rooms)
-        await db.commit()
+    async with DBManager(session_factory=async_session_maker_null_pool) as db_:
+        await db_.hotels.add_raw(mock_hotels)
+        await db_.rooms.add_raw(mock_rooms)
+        await db_.commit()
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def register_user(setup_database):
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
-        await ac.post(
-            "/auth/register",
-            json={
-                "email": "kot@pes.com",
-                "password": "1234"
-            }
-        )
+async def register_user(setup_database, ac):
+    await ac.post(
+        "/auth/register",
+        json={
+            "email": "kot@pes.com",
+            "password": "1234"
+        }
+    )
