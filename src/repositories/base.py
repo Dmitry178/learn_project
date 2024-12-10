@@ -64,12 +64,12 @@ class BaseRepository:
         await self.session.execute(edit_data_stmt)
         return None
 
-    async def edit_by_id(self, pk: int, data: BaseModel, exclude_unset: bool = False) -> None:
+    async def edit_by_id(self, id_: int, data: BaseModel, exclude_unset: bool = False) -> None:
 
         edit_data_stmt = (
             update(self.model)
             .values(**data.model_dump(exclude_unset=exclude_unset))
-            .filter_by(id=pk)
+            .filter_by(id=id_)
             # .returning(self.model)
         )
         await self.session.execute(edit_data_stmt)
@@ -82,8 +82,8 @@ class BaseRepository:
         await self.session.execute(delete_stmt)
         return None
 
-    async def delete_by_id(self, pk: int) -> None:
+    async def delete_by_id(self, id_: int) -> None:
 
-        delete_stmt = delete(self.model).filter_by(id=pk)
+        delete_stmt = delete(self.model).filter_by(id=id_)
         await self.session.execute(delete_stmt)
         return None

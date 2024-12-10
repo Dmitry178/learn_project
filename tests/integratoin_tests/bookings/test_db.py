@@ -18,6 +18,7 @@ async def test_booking_crud(db):
 
     # тест добавления записи
     booking_added = await db.bookings.add(booking_data)
+    assert booking_added
     id_ = booking_added.id
 
     # тест изменение записи
@@ -28,6 +29,8 @@ async def test_booking_crud(db):
     )
     await db.bookings.edit(booking_data, exclude_unset=True)
     booking_updated = await db.bookings.get_one_or_none(id=id_)
+    assert booking_updated
+
     booking_compare = BookingPatch(
         id=id_,
         user_id=user_id,
