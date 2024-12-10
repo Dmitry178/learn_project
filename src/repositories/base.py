@@ -48,6 +48,11 @@ class BaseRepository:
         add_data_stmt = insert(self.model).values([item.model_dump() for item in data])
         await self.session.execute(add_data_stmt)
 
+    async def add_raw(self, raw_data) -> None:
+
+        add_data_stmt = insert(self.model).values(raw_data)
+        await self.session.execute(add_data_stmt)
+
     async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by) -> None:
 
         edit_data_stmt = (
