@@ -1,6 +1,6 @@
 from datetime import date
 
-from src.schemas.booking import BookingPost, BookingPatch
+from src.schemas.booking import BookingPost, BookingPatch, BookingPatchNoId
 
 
 async def test_booking_crud(db):
@@ -22,12 +22,12 @@ async def test_booking_crud(db):
     id_ = booking_added.id
 
     # тест изменение записи
-    booking_data = BookingPatch(
-        id=id_,
+    booking_data = BookingPatchNoId(
         date_to=date(year=2024, month=8, day=30),
         price=90,
     )
-    await db.bookings.edit(booking_data, exclude_unset=True)
+    await db.bookings.edit_by_id(id_, booking_data, exclude_unset=True)
+
     booking_updated = await db.bookings.get_one_or_none(id=id_)
     assert booking_updated
 

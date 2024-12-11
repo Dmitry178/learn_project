@@ -9,7 +9,6 @@ bookings_router = APIRouter(prefix="/bookings", tags=["Бронирование"
 
 @bookings_router.post("")
 async def create_booking(
-        hotel_id: int,
         user_id: UserIdDep,
         db: DBDep,
         booking_data: BookingAdd = Body()
@@ -18,7 +17,6 @@ async def create_booking(
     price: int = room.price
 
     booking_post = BookingPost(
-        hotel_id=hotel_id,
         user_id=user_id,
         price=price,
         **booking_data.model_dump()

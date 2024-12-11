@@ -76,8 +76,9 @@ async def register_user(setup_database, ac):
     )
 
 
-@pytest.fixture(scope="session", autouse=True)
-async def authenticated_ac(register_user, ac):
+@pytest.fixture(scope="session")
+async def aac(register_user, ac):
+    # authenticated_ac
     response = await ac.post(
         "/auth/login",
         json={
@@ -86,5 +87,5 @@ async def authenticated_ac(register_user, ac):
         }
     )
     assert response.status_code == 200, "Ошибка создания пользователя"
-    assert 'access_token' in ac.cookies, "Кука не создана"
+    assert "access_token" in ac.cookies, "Кука не создана"
     yield ac
