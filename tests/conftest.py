@@ -74,3 +74,17 @@ async def register_user(setup_database, ac):
             "password": "12345"
         }
     )
+
+
+@pytest.fixture(scope="session", autouse=True)
+async def authenticated_ac(register_user, ac):
+    response = await ac.post(
+        "/auth/login",
+        json={
+            "email": "test@user.com",
+            "password": "12345"
+        }
+    )
+    assert response.status_code == 200, "Ошибка создания пользователя"
+    assert 'access_token' in ac.cookies, "Кука не создана"
+    yield ac
