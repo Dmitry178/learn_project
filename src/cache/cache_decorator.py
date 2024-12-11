@@ -26,7 +26,7 @@ def hash_params(params: dict):
     return result
 
 
-def my_cache(expires: int = 10):
+def my_cache(expire: int = 10):
     """
     Кеширование результатов работы эндпоинта в redis
     """
@@ -47,7 +47,7 @@ def my_cache(expires: int = 10):
                 # в redis нет данных, вызываем функцию, помещаем данные в redis
                 print('Запускается эндпоинт')
                 result = await func(*args, **kwargs)
-                await redis_manager.set(key, pickle.dumps(result), expire=expires)
+                await redis_manager.set(key, pickle.dumps(result), expire=expire)
                 return result
 
         return wrapper
