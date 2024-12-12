@@ -41,11 +41,14 @@ async def db_m() -> DBManager:
 
 
 @pytest.fixture(scope="module")
-async def delete_bookings(db_m):
-    await db_m.bookings.delete()
-    await db_m.commit()
-    yield
-    pass
+async def delete_bookings():
+    # await db_m.bookings.delete()
+    # await db_m.commit()
+    # yield
+    # pass
+    async for db_ in get_db_null_pool():
+        await db_.bookings.delete()
+        await db_.commit()
 
 
 @pytest.mark.parametrize("room_id, date_from, date_to, status_code, num_bookings", [
