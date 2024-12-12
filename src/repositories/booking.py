@@ -8,6 +8,7 @@ from src.database import engine
 from src.models import BookingsOrm, RoomsOrm
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import BookingDataMapper
+from src.repositories.utils import rooms_ids_for_booking
 from src.schemas.booking import BookingPost
 
 
@@ -25,7 +26,7 @@ class BookingsRepository(BaseRepository):
 
     async def add_booking(self, booking: BookingPost):
         """
-        Добавление бронирования
+        Добавление бронирования (вариант решения без использования существующего кода)
         """
 
         # получение количества свободных комнат
@@ -89,3 +90,23 @@ class BookingsRepository(BaseRepository):
         booking = await self.add(booking)
 
         return booking
+
+    async def add_booking_alt(self, data: BookingPost, hotel_id: int):
+        """
+        Альтернативный вариант решения с использованием существующего кода
+        """
+
+        rooms_ids_to_get = rooms_ids_for_booking(
+            date_from=data.date_from,
+            date_to=data.date_to,
+            hotel_id=hotel_id,
+        )
+
+        rooms_ids_to_book_res = await self.session.execute(rooms_ids_to_get)
+        rooms_ids_to_book: list[int] = rooms_ids_to_book_res.scalars().all()
+
+        if data.room_id in rooms_ids_to_book:
+            new_booking = await self.add(data)
+            return new_booking
+        else:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Недостаточно свободных номеров")
