@@ -18,7 +18,10 @@ async def login_user(response: Response, data: UserRequestAdd, db: DBDep):
 
     # bcrypt 3.2.0
 
-    user = await db.users.get_user_with_hashed_password(email=data.email)
+    try:
+        user = await db.users.get_user_with_hashed_password(email=data.email)
+    except:  # noqa
+        raise HTTPException(status_code=401, detail="User not found")
 
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
@@ -51,10 +54,13 @@ async def register_user(data: UserRequestAdd, db: DBDep):
     hashed_password = AuthService().hash_password(data.password)
     new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
 
-    await db.users.add(new_user_data)
-    await db.commit()
+    try:
+        await db.users.add(new_user_data)
+        await db.commit()
+        return {"status": "OK"}
 
-    return {"status": "OK"}
+    except:  # noqa
+        return {"status": "Ошибка создания пользователя"}
 
 
 @auth_router.get("/user_info")
