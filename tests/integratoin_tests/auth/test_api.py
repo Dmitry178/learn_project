@@ -37,26 +37,33 @@ async def test_create_user(ac):
     (f"1{email}", password, 401),
     (email, f"1{password}", 401),
     (email, password, 200),
+    ("email@1234", "password", 422),
 ])
-async def test_login(email_, password_, status_code, ac):
+async def test_login(email_: str, password_: str, status_code: int, ac):
     """
     Тестирование входа пользователя (логина) и получения информации о пользователе
     """
 
     # попытка логина
-    data = UserRequestAdd(
-        email=email_,
-        password=password_
-    )
     response = await ac.post(
         "/auth/login",
-        json=data.model_dump()
+        json={"email": email_, "password": password_}
     )
     assert response.status_code == status_code
+
+    if response.status_code != 200:
+        return
 
     # получение данных пользователя
     response = await ac.get("/auth/user_info")
     assert response.status_code == status_code
+    if response.status_code == 200:
+        json_data = response.json()
+        assert "password" not in json_data
+        assert "hashed_password" not in json_data
+        json_data = json_data["user"]
+        assert json_data["email"] == email_
+        assert "id" in json_data
 
 
 async def test_logout(ac):
@@ -68,6 +75,7 @@ async def test_logout(ac):
     response = await ac.post("/auth/login", json={"email": email, "password": password})
     assert response.status_code == 200
     assert "access_token" in response.json()
+    assert "access_token" in ac.cookies
 
     # проверка информации о пользователе
     response = await ac.get("/auth/user_info")
@@ -81,3 +89,4 @@ async def test_logout(ac):
     # проверка информации о пользователе
     response = await ac.get("/auth/user_info")
     assert response.status_code == 401
+    assert "access_token" not in ac.cookies
