@@ -1,9 +1,10 @@
-import json
-from unittest import mock
+# ruff: noqa: E402
 
+import json
 import pytest
 
 from httpx import AsyncClient, ASGITransport
+from unittest import mock
 
 mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 # mock.patch("src.cache.cache_decorator.my_cache", lambda *args, **kwargs: lambda f: f).start()

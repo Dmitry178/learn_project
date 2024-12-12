@@ -1,4 +1,3 @@
-import asyncio
 import multiprocessing
 import subprocess
 
@@ -10,8 +9,6 @@ from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from pathlib import Path
-
-from src.tasks.asyncio_tasks import run_send_email_regularly
 
 sys.path.append(str(Path(__file__).parent.parent))
 

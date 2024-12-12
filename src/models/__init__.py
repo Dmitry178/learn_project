@@ -14,3 +14,12 @@ from src.models.rooms import (
 from src.models.users import (
     UsersOrm
 )
+
+__all__ = [
+    "BookingsOrm",
+    "FacilitiesOrm",
+    "RoomsFacilitiesOrm",
+    "HotelsOrm",
+    "RoomsOrm",
+    "UsersOrm",
+]

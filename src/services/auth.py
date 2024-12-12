@@ -29,5 +29,5 @@ class AuthService:
         try:
             payload = jwt.decode(token, algorithms=settings.JWT_ALGORITHM, key=settings.JWT_SECRET_KEY)
             return payload
-        except:
+        except:  # noqa
             return {}
