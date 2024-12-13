@@ -3,7 +3,6 @@ name = "learn-project"
 version = "0.1.0"
 description = ""
 authors = ["Dmitry"]
-readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -27,10 +26,29 @@ pytest = "^8.3.4"
 pytest-asyncio = "^0.24.0"
 pytest-dotenv = "^0.5.2"
 
-
-
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.8.3"
+pyright = "^1.1.390"
+
+[tool.ruff]
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".venv",
+    "__pypackages__",
+    "src/migrations/*",
+    "static",
+    "venv",
+]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.format]
+preview = true
 
 [build-system]
 requires = ["poetry-core"]
