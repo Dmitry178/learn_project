@@ -1,10 +1,9 @@
 from datetime import date
 
-from fastapi import HTTPException
 from sqlalchemy import select, func
-from starlette import status
 
 from src.database import engine
+from src.exceptions import AllRoomsAreBookedException
 from src.models import BookingsOrm, RoomsOrm
 from src.repositories.base import BaseRepository
 from src.repositories.mappers.mappers import BookingDataMapper
@@ -84,7 +83,7 @@ class BookingsRepository(BaseRepository):
         print(f'{rooms_left=}')
 
         if not rooms_left:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Недостаточно свободных номеров")
+            raise AllRoomsAreBookedException
 
         # бронирование
         booking = await self.add(booking)
@@ -108,5 +107,5 @@ class BookingsRepository(BaseRepository):
         if data.room_id in rooms_ids_to_book:
             new_booking = await self.add(data)
             return new_booking
-        else:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Недостаточно свободных номеров")
+
+        raise AllRoomsAreBookedException
