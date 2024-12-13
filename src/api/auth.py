@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Response
 
 from src.api.dependencies import UserIdDep, DBDep
+from src.exceptions import UserExists, UserNotFound
 from src.schemas.users import UserRequestAdd, UserAdd
 from src.services.auth import AuthService
 
@@ -17,11 +18,14 @@ async def login_user(response: Response, data: UserRequestAdd, db: DBDep):
 
     try:
         user = await db.users.get_user_with_hashed_password(email=data.email)
-    except:  # noqa
-        raise HTTPException(status_code=401, detail="User not found")
+        if not user:
+            raise UserNotFound
 
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found")
+    except UserNotFound as ex:
+        raise HTTPException(status_code=401, detail=ex.detail)
+
+    except Exception:
+        raise HTTPException(status_code=401, detail="Ошибка получения пользователя")
 
     if not AuthService().verify_password(data.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="User password incorrect")
@@ -52,12 +56,15 @@ async def register_user(data: UserRequestAdd, db: DBDep):
     new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
 
     try:
+        if db.users.get_one_or_none(email=data.email):
+            raise UserExists()
+
         await db.users.add(new_user_data)
         await db.commit()
         return {"status": "OK"}
 
-    except:  # noqa
-        return {"status": "Ошибка создания пользователя"}
+    except UserExists as ex:
+        raise HTTPException(status_code=ex.status_code, detail=ex.detail)
 
 
 @auth_router.get("/user_info")

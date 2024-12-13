@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
-from src.exceptions import ObjectNotFoundException, AllRoomsAreBookedException
+from src.exceptions import ObjectNotFoundException, AllRoomsAreBookedException, DateError
 from src.schemas.booking import BookingAdd, BookingPost
 from src.schemas.rooms import Room
 
@@ -15,9 +15,13 @@ async def create_booking(
         booking_data: BookingAdd = Body()
 ):
     try:
+        if booking_data.date_from >= booking_data.date_to:
+            raise DateError
+
         room: Room = await db.rooms.get_one(id=booking_data.room_id)
-    except ObjectNotFoundException:
-        raise HTTPException(status_code=400, detail="Номер не найден")
+
+    except (DateError, ObjectNotFoundException) as ex:
+        raise HTTPException(status_code=ex.status_code, detail=ex.detail)
 
     price: int = room.price
 
@@ -52,8 +56,12 @@ async def add_booking_alt(
         price=room_price,
         **booking_data.model_dump(),
     )
-    booking = await db.bookings.add_booking_alt(_booking_data, hotel_id=hotel.id)
-    await db.commit()
+
+    try:
+        booking = await db.bookings.add_booking_alt(_booking_data, hotel_id=hotel.id)
+        await db.commit()
+    except AllRoomsAreBookedException as ex:
+        raise HTTPException(status_code=409, detail=ex.detail)
 
     return {"status": "OK", "data": booking}
 
