@@ -1,4 +1,7 @@
-class BookingsException(Exception):
+from fastapi import HTTPException
+
+
+class BaseCustomException(Exception):
     detail = "Неожиданная ошибка"
     status_code = 400
 
@@ -6,39 +9,55 @@ class BookingsException(Exception):
         super().__init__(self.detail, *args)
 
 
-class ObjectNotFoundException(BookingsException):
+class ObjectNotFoundException(BaseCustomException):
     detail = "Объект не найден"
     status_code = 404
 
 
-class ObjectAlreadyExistsException(BookingsException):
+class ObjectAlreadyExistsException(BaseCustomException):
     detail = "Объект уже существует"
 
 
-class AllRoomsAreBookedException(BookingsException):
+class AllRoomsAreBookedException(BaseCustomException):
     detail = "Не осталось свободных номеров"
     status_code = 404
 
 
-class UserExists(BookingsException):
+class RoomNotFoundException(BaseCustomException):
+    detail = "Комната не найдена"
+    status_code = 404
+
+
+class UserExists(BaseCustomException):
     detail = "Пользователь уже зарегистрирован"
     status_code = 409
 
 
-class UserNotFound(BookingsException):
+class UserNotFound(BaseCustomException):
     detail = "Пользователь не найден"
     status_code = 404
 
 
-class DateError(BookingsException):
+class PasswordIncorrect(BaseCustomException):
+    detail = "Пароль пользователя неверный"
+    status_code = 401
+
+
+class DateError(BaseCustomException):
     detail = "Даты указаны неверно"
 
 
-class HotelNotFound(BookingsException):
+class HotelNotFound(BaseCustomException):
     detail = "Отель не найден"
     status_code = 404
 
 
-class RoomNotFound(BookingsException):
+class RoomNotFound(BaseCustomException):
     detail = "Комната не найдена"
     status_code = 404
+
+
+DateErrorHTTP = HTTPException(status_code=400, detail="Даты указаны неверно")
+FacilityExistsHTTP = HTTPException(status_code=409, detail="Такое удобство уже существует")
+HotelNotFoundHTTP = HTTPException(status_code=404, detail="Отель не существует")
+UserNotFoundHTTP = HTTPException(status_code=404, detail="Пользователь не найден")

@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.api.auth import auth_router
-from src.api.booking import bookings_router
+from src.api.bookings import bookings_router
 from src.api.default import default_router
 from src.api.facilities import facilities_router
 from src.api.hotels import hotels_router

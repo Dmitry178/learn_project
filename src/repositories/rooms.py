@@ -1,9 +1,11 @@
 from datetime import date
 
 from sqlalchemy import select, func
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import selectinload
 
 from src.database import engine
+from src.exceptions import RoomNotFoundException
 from src.models import BookingsOrm
 from src.models.rooms import RoomsOrm
 from src.repositories.base import BaseRepository
@@ -63,6 +65,23 @@ class RoomsRepository(BaseRepository):
             return None
 
         # return RoomWithRels.model_validate(model)
+        return RoomDataWithRelsMapper.map_to_domain_entity(model)
+
+    async def get_one_with_rels(self, **filter_by):
+        query = (
+            select(self.model)
+            .options(selectinload(self.model.facilities))
+            .filter_by(**filter_by)
+        )
+
+        result = await self.session.execute(query)
+
+        try:
+            model = result.scalar_one()
+
+        except NoResultFound:
+            raise RoomNotFoundException
+
         return RoomDataWithRelsMapper.map_to_domain_entity(model)
 
     async def get_filtered_by_date(

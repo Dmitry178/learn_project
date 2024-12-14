@@ -10,7 +10,7 @@ from src.utils.db_manager import DBManager
 
 
 @celery_instance.task
-def test_task():
+def some_test_task():
     sleep(5)
     print("Запуск задачи")
 

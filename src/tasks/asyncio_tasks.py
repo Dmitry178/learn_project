@@ -1,6 +1,6 @@
 import asyncio
 
-from src.api.dependencies import get_db
+from src.dependencies import get_db
 
 
 async def send_emails_bookings_today_checkin():

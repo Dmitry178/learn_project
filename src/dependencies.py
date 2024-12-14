@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException, Request
 from typing import Annotated
 
 from src.database import async_session_maker
-from src.services.auth import AuthService
+from src.services.auth import AuthServices
 from src.utils.db_manager import DBManager
 
 
@@ -14,7 +14,7 @@ def get_token(request: Request) -> str:
 
 
 def get_current_user_id(token: str = Depends(get_token)) -> int:
-    decoded_token = AuthService().decode_token(token)
+    decoded_token = AuthServices().decode_token(token)
     if not decoded_token:
         raise HTTPException(status_code=401, detail="Token error")
 

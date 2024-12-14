@@ -9,7 +9,7 @@ from unittest import mock
 mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 # mock.patch("src.cache.cache_decorator.my_cache", lambda *args, **kwargs: lambda f: f).start()
 
-from src.api.dependencies import get_db
+from src.dependencies import get_db
 from src.config import settings
 from src.database import Base, engine_null_pool, async_session_maker_null_pool
 from src.main import app
