@@ -3,7 +3,7 @@ from datetime import date
 from fastapi import APIRouter, Body, Query, HTTPException
 
 from src.api.dependencies import DBDep
-from src.api.utils import check_hotel_available, check_room_available
+from src.api.utils import check_hotel_available, check_room_available, check_hotel_dates
 from src.exceptions import DateError, HotelNotFound, RoomNotFound
 from src.schemas.facilities import RoomFacilityAdd
 from src.schemas.rooms import RoomAdd, RoomPatch, RoomAddId, RoomAddRequest, RoomPatchRequest
@@ -23,9 +23,7 @@ async def get_room(
     """
 
     try:
-        if date_from >= date_to:
-            raise DateError
-
+        await check_hotel_dates(date_from, date_to)
         await check_hotel_available(db, hotel_id)
 
         # return await db.rooms.get_rooms_by_date(hotel_id=hotel_id, date_from=date_from, date_to=date_to)

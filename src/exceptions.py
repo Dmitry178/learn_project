@@ -11,6 +11,10 @@ class ObjectNotFoundException(BookingsException):
     status_code = 404
 
 
+class ObjectAlreadyExistsException(BookingsException):
+    detail = "Объект уже существует"
+
+
 class AllRoomsAreBookedException(BookingsException):
     detail = "Не осталось свободных номеров"
     status_code = 404

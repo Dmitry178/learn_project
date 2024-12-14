@@ -68,13 +68,14 @@ async def setup_database(check_test_mode):
 
 @pytest.fixture(scope="session", autouse=True)
 async def register_user(setup_database, ac):
-    await ac.post(
+    response = await ac.post(
         "/auth/register",
         json={
             "email": "test@user.com",
             "password": "12345"
         }
     )
+    assert response.status_code == 200, "Ошибка создания пользователя"
 
 
 @pytest.fixture(scope="session")
@@ -87,6 +88,6 @@ async def aac(register_user, ac):
             "password": "12345"
         }
     )
-    assert response.status_code == 200, "Ошибка создания пользователя"
+    assert response.status_code == 200, "Пользователь не создан"
     assert "access_token" in ac.cookies, "Кука не создана"
     yield ac

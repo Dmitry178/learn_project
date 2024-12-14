@@ -29,8 +29,7 @@ async def test_create_user(ac):
         "/auth/register",
         json=data.model_dump()
     )
-    assert response.status_code == 200, "Ошибка статуса повторного пользователя"
-    assert response.json()["status"] == "Ошибка создания пользователя", "Пользователь не должен быть создан"
+    assert response.status_code == 409, "Ошибка статуса повторного пользователя"
 
 
 @pytest.mark.parametrize("email_, password_, status_code", [

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query, Body, HTTPException
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import DBDep
-from src.api.utils import check_hotel_available
+from src.api.utils import check_hotel_available, check_hotel_dates
 from src.exceptions import DateError, HotelNotFound
 from src.schemas.hotels import HotelPatch, PaginationDep, HotelAdd
 
@@ -26,8 +26,7 @@ async def get_hotels(
 
     # return await db.hotels.get_all_hotels(title=title, location=location, limit=limit, offset=offset)
     try:
-        if date_from >= date_to:
-            raise DateError
+        await check_hotel_dates(date_from, date_to)
 
         result = await db.hotels.get_hotels_by_date(
             date_from=date_from,

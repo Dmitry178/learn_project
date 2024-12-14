@@ -56,7 +56,7 @@ async def register_user(data: UserRequestAdd, db: DBDep):
     new_user_data = UserAdd(email=data.email, hashed_password=hashed_password)
 
     try:
-        if db.users.get_one_or_none(email=data.email):
+        if await db.users.get_one_or_none(email=data.email):
             raise UserExists()
 
         await db.users.add(new_user_data)

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Body, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
+from src.api.utils import check_hotel_dates
 from src.exceptions import ObjectNotFoundException, AllRoomsAreBookedException, DateError
 from src.schemas.booking import BookingAdd, BookingPost
 from src.schemas.rooms import Room
@@ -15,9 +16,7 @@ async def create_booking(
         booking_data: BookingAdd = Body()
 ):
     try:
-        if booking_data.date_from >= booking_data.date_to:
-            raise DateError
-
+        await check_hotel_dates(booking_data.date_from, booking_data.date_to)
         room: Room = await db.rooms.get_one(id=booking_data.room_id)
 
     except (DateError, ObjectNotFoundException) as ex:
