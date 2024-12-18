@@ -1,0 +1,35 @@
+stages:
+  - build
+  - lint
+  - migrations
+  - test
+  - deploy
+
+build-job:
+  stage: build
+  before_script:
+    - cp ${ENV} .env
+    - cp ${TEST_ENV} .env-test
+  script:
+    - docker build -t booking-api-image .
+
+lint-job:
+  stage: lint
+  script:
+    - docker run --rm --network myNetwork booking-api-image ruff check
+
+migrations-job:
+  stage: migrations
+  script:
+    - docker run --rm --network myNetwork booking-api-image alembic upgrade head
+
+tests-job:
+  stage: test
+  script:
+    - docker run --rm --network myNetwork booking-api-image pytest -s -v
+
+deploy-job:
+  stage: deploy
+  script:
+    - docker compose -f docker-compose-ci.yml up -d
+    - docker exec booking_nginx nginx -s reload
