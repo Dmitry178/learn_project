@@ -33,6 +33,6 @@ class FacilitiesService(BaseService):
         facility = await self.db.facilities.add(facility_data)
         await self.db.commit()
 
-        some_test_task.delay()
+        # some_test_task.delay()
 
         return facility

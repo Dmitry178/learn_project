@@ -14,7 +14,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from src.api.auth import auth_router
 from src.api.bookings import bookings_router
-from src.api.default import default_router
+# from src.api.default import default_router
 from src.api.facilities import facilities_router
 from src.api.hotels import hotels_router
 from src.api.images import images_router
@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):  # noqa
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(default_router)
+# app.include_router(default_router)
 app.include_router(auth_router)
 app.include_router(hotels_router)
 app.include_router(rooms_router)
